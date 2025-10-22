@@ -1,0 +1,38 @@
+services:
+  # MySQL 数据库
+  mysql:
+    image: mysql:8.0
+    container_name: bookstore-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root123456
+      MYSQL_DATABASE: bookstore # 数据库 sky_take_out
+      MYSQL_USER: bookstore
+      MYSQL_PASSWORD: bookstore123456
+    ports:
+      - "3307:3306" # Docker 中 MySQL 的 3306 端口映射到 WSL2 的 3307 端口
+    volumes:
+      - mysql_data:/var/lib/mysql
+#      - ./sql:/docker-entrypoint-initdb.d # 在容器首次启动 (数据卷为空, 数据库未初始化) 时执行初始化脚本
+    networks:
+      - bookstore-network
+    restart: unless-stopped
+
+  # Redis 缓存
+  redis:
+    image: redis:7.2-alpine
+    container_name: bookstore-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - bookstore-network
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+  redis_data:
+
+networks:
+  bookstore-network:
+    driver: bridge
