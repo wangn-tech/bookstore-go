@@ -14,7 +14,7 @@ type IUserService interface {
 	// Login 登录
 	Login(ctx context.Context, username, password string) (*response.UserLoginVO, error)
 	// Logout 登出
-	Logout(ctx context.Context) error
+	Logout(ctx context.Context, userID uint64) error
 	// Register 注册
 	Register(ctx context.Context, username, password, email, phone string) error
 	// GetUserByID 获取用户信息
@@ -67,7 +67,11 @@ func (u *UserServiceImpl) Login(ctx context.Context, username, password string) 
 	}, nil
 }
 
-func (u *UserServiceImpl) Logout(ctx context.Context) error {
+func (u *UserServiceImpl) Logout(ctx context.Context, userID uint64) error {
+	// 调用 RevokeToken 函数，从 Redis 中删除用户的 token
+	if err := utils.RevokeToken(userID); err != nil {
+		return err
+	}
 	return nil
 }
 

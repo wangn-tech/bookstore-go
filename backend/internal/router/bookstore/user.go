@@ -32,6 +32,8 @@ func (u *UserRouter) InitUserRouter(router *gin.RouterGroup) {
 		// 需要认证的路由
 		userGroup.Use(middlerware.JWTAuth())
 		{
+			userGroup.GET("/profile", userHandler.GetUserProfile) // 获取用户信息
+			userGroup.POST("/logout", userHandler.Logout)         // 用户登出
 
 		}
 	}

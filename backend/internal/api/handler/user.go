@@ -123,3 +123,34 @@ func (u *UserHandler) GetUserProfile(ctx *gin.Context) {
 		UpdatedAt: user.UpdatedAt.Format("2006-01-02 15:04:05"),
 	})
 }
+
+// Logout 用户登出
+//
+//	// 在 JWT 方案中, 服务端的登出是可选的, 真正的登出由客户端删除 token 实现
+//	// 此处实现: 在 redis 中删除 token, 使其失效
+func (u *UserHandler) Logout(ctx *gin.Context) {
+	// 从 context 中获取 userID
+	userIDVal, ok := ctx.Get("userID")
+	if !ok {
+		logger.Log.Warn("Logout: 用户ID不存在")
+		result.Fail(ctx, http.StatusUnauthorized, "用户未登录")
+		return
+	}
+	userID, ok := userIDVal.(uint64)
+	if !ok {
+		logger.Log.Warn("Logout: 用户ID类型不匹配", zap.Any("userID", userIDVal))
+		result.Fail(ctx, http.StatusUnauthorized, "用户未登录")
+		return
+	}
+
+	// 调用 service 层登出用户
+	if err := u.userService.Logout(ctx.Request.Context(), userID); err != nil {
+		logger.Log.Error("Logout: 撤销 token 失败", zap.Uint64("userID", userID), zap.Error(err))
+		result.Fail(ctx, http.StatusInternalServerError, "用户登出失败")
+		return
+	}
+
+	// 登出成功
+	logger.Log.Info("Logout: 登出成功", zap.Uint64("userID", userID))
+	result.Success(ctx, "用户登出成功", nil)
+}
