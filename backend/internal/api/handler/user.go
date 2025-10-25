@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/wangn-tech/bookstore-go/common/result"
 	"github.com/wangn-tech/bookstore-go/internal/api/request"
+	"github.com/wangn-tech/bookstore-go/internal/api/response"
 	"github.com/wangn-tech/bookstore-go/internal/service"
 	"github.com/wangn-tech/bookstore-go/pkg/logger"
 	"go.uber.org/zap"
@@ -85,4 +86,40 @@ func (u *UserHandler) Login(ctx *gin.Context) {
 
 	// 登录成功
 	result.Success(ctx, "用户登录成功", userLoginVO)
+}
+
+// GetUserProfile 获取用户信息
+func (u *UserHandler) GetUserProfile(ctx *gin.Context) {
+	// 从 context 中获取 userID
+	userIDVal, ok := ctx.Get("userID")
+	if !ok {
+		logger.Log.Warn("GetUserProfile: 用户ID不存在")
+		result.Fail(ctx, http.StatusUnauthorized, "用户未登录")
+		return
+	}
+	userID, ok := userIDVal.(uint64)
+	if !ok {
+		logger.Log.Warn("GetUserProfile: 用户ID类型不匹配", zap.Any("userID", userIDVal))
+		result.Fail(ctx, http.StatusUnauthorized, "用户未登录")
+		return
+	}
+
+	// 调用 service 层获取用户信息
+	user, err := u.userService.GetUserByID(ctx.Request.Context(), userID)
+	if err != nil {
+		logger.Log.Warn("GetUserProfile: 获取用户信息失败", zap.Error(err))
+		result.Fail(ctx, http.StatusInternalServerError, "获取用户信息失败")
+		return
+	}
+
+	// 返回用户信息
+	result.Success(ctx, "获取用户信息成功", &response.UserProfileVO{
+		ID:        user.ID,
+		Username:  user.Username,
+		Email:     user.Email,
+		Phone:     user.Phone,
+		Avatar:    user.Avatar,
+		CreatedAt: user.CreatedAt.Format("2006-01-02 15:04:05"),
+		UpdatedAt: user.UpdatedAt.Format("2006-01-02 15:04:05"),
+	})
 }

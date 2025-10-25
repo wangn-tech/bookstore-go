@@ -68,10 +68,20 @@ func (u *UserDao) CreateUser(ctx context.Context, user *model.User) error {
 	return u.db.WithContext(ctx).Create(user).Error
 }
 
-// GetUserByUsername 根据用户名获取用户
+// GetUserByUsername 根据 username 获取 user
 func (u *UserDao) GetUserByUsername(ctx context.Context, username string) (*model.User, error) {
 	var user model.User
 	err := u.db.WithContext(ctx).Where("username = ?", username).First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+// GetUserByID 根据 userID 获取 user
+func (u *UserDao) GetUserByID(ctx context.Context, userID uint64) (*model.User, error) {
+	var user model.User
+	err := u.db.WithContext(ctx).Where("id = ?", userID).First(&user).Error
 	if err != nil {
 		return nil, err
 	}

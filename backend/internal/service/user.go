@@ -17,8 +17,8 @@ type IUserService interface {
 	Logout(ctx context.Context) error
 	// Register 注册
 	Register(ctx context.Context, username, password, email, phone string) error
-	// GetUserProfile 获取用户信息
-	GetUserProfile(ctx context.Context) error
+	// GetUserByID 获取用户信息
+	GetUserByID(ctx context.Context, userID uint64) (*model.User, error)
 	// UpdateUserProfile 更新用户信息
 	UpdateUserProfile(ctx context.Context) error
 	// ChangePassword 修改密码
@@ -96,8 +96,12 @@ func (u *UserServiceImpl) Register(ctx context.Context, username, password, emai
 	return nil
 }
 
-func (u *UserServiceImpl) GetUserProfile(ctx context.Context) error {
-	return nil
+func (u *UserServiceImpl) GetUserByID(ctx context.Context, userID uint64) (*model.User, error) {
+	user, err := u.userDao.GetUserByID(ctx, userID)
+	if err != nil || user == nil {
+		return nil, err
+	}
+	return user, nil
 }
 
 func (u *UserServiceImpl) UpdateUserProfile(ctx context.Context) error {
