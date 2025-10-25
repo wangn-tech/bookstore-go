@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/wangn-tech/bookstore-go/internal/app/config"
 	"github.com/wangn-tech/bookstore-go/internal/app/constants"
 	"github.com/wangn-tech/bookstore-go/internal/app/initializer/redis"
-	"time"
 )
 
 // Claims 自定义 JWT 载荷结构体
@@ -26,8 +28,7 @@ type TokenResponse struct {
 }
 
 // GenerateTokenPair 生成一对 accessToken 和 refreshToken
-func GenerateTokenPair(userID uint64, username string, jwtSecret string) (*TokenResponse, error) {
-	byteSecret := []byte(jwtSecret)
+func GenerateTokenPair(userID uint64, username string) (*TokenResponse, error) {
 	// 生成 accessToken
 	accessClaims := Claims{
 		UserID:    userID,
@@ -40,7 +41,7 @@ func GenerateTokenPair(userID uint64, username string, jwtSecret string) (*Token
 			NotBefore: jwt.NewNumericDate(time.Now()),                                  // 生效时间
 		},
 	}
-	accessToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims).SignedString(byteSecret)
+	accessToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims).SignedString([]byte(config.AppConf.JWT.Secret))
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +58,7 @@ func GenerateTokenPair(userID uint64, username string, jwtSecret string) (*Token
 			NotBefore: jwt.NewNumericDate(time.Now()),                                   // 生效时间
 		},
 	}
-	refreshToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims).SignedString(byteSecret)
+	refreshToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims).SignedString([]byte(config.AppConf.JWT.Secret))
 	if err != nil {
 		return nil, err
 	}
@@ -98,8 +99,8 @@ func StoreTokenInRedis(userID uint64, accessToken string, refreshToken string) e
 }
 
 // GenerateToken 兼容旧接口, 返回 accessToken
-func GenerateToken(userID uint64, subject string, jwtSecret string) (string, error) {
-	tokenResponse, err := GenerateTokenPair(userID, subject, jwtSecret)
+func GenerateToken(userID uint64, username string) (string, error) {
+	tokenResponse, err := GenerateTokenPair(userID, username)
 	if err != nil {
 		return "", err
 	}
@@ -107,10 +108,9 @@ func GenerateToken(userID uint64, subject string, jwtSecret string) (string, err
 }
 
 // ParseToken 解析和校验JWT Token
-func ParseToken(tokenString string, jwtSecret string) (*Claims, error) {
-	byteSecret := []byte(jwtSecret)
-	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return byteSecret, nil
+func ParseToken(tokenString string) (*Claims, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (any, error) {
+		return []byte(config.AppConf.JWT.Secret), nil
 	})
 	if err != nil {
 		return nil, err
@@ -147,9 +147,9 @@ func IsTokenValidInRedis(userID uint64, token string, tokenType string) bool {
 }
 
 // RefreshAccessToken 使用刷新token生成新的访问token
-func RefreshAccessToken(refreshToken string, jwtSecret string) (*TokenResponse, error) {
+func RefreshAccessToken(refreshToken string) (*TokenResponse, error) {
 	// 解析刷新token
-	claims, err := ParseToken(refreshToken, jwtSecret)
+	claims, err := ParseToken(refreshToken)
 	if err != nil {
 		return nil, err
 	}
@@ -159,7 +159,7 @@ func RefreshAccessToken(refreshToken string, jwtSecret string) (*TokenResponse, 
 	}
 
 	// 生成新的token对
-	return GenerateTokenPair(claims.UserID, claims.Username, jwtSecret)
+	return GenerateTokenPair(claims.UserID, claims.Username)
 }
 
 // RevokeToken 撤销用户的所有token

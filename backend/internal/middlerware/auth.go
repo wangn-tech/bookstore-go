@@ -1,15 +1,15 @@
 package middlerware
 
 import (
+	"net/http"
+	"strings"
+
 	"github.com/gin-gonic/gin"
-	result "github.com/wangn-tech/bookstore-go/common"
-	"github.com/wangn-tech/bookstore-go/internal/app/config"
+	"github.com/wangn-tech/bookstore-go/common/result"
 	"github.com/wangn-tech/bookstore-go/internal/app/constants"
 	"github.com/wangn-tech/bookstore-go/internal/utils"
 	"github.com/wangn-tech/bookstore-go/pkg/logger"
 	"go.uber.org/zap"
-	"net/http"
-	"strings"
 )
 
 // JWTAuth 创建一个 JWT 认证中间件
@@ -34,7 +34,7 @@ func JWTAuth() gin.HandlerFunc {
 			return
 		}
 		tokenStr := tokenParts[1]
-		claims, err := utils.ParseToken(tokenStr, config.AppConf.JWT.Secret)
+		claims, err := utils.ParseToken(tokenStr)
 		if err != nil {
 			// token 解析失败
 			logger.Log.Warn("token 解析失败", zap.Error(err), zap.String("path", ctx.Request.URL.Path))

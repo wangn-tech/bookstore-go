@@ -1,8 +1,9 @@
 package result
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 const (
@@ -10,7 +11,7 @@ const (
 	ERROR   = -1 //失败
 )
 
-func Response(c *gin.Context, httpStatus int, code int, msg string, data interface{}) {
+func Response(c *gin.Context, httpStatus int, code int, msg string, data any) {
 	c.JSON(httpStatus, gin.H{
 		"code": code,
 		"msg":  msg,
@@ -19,13 +20,13 @@ func Response(c *gin.Context, httpStatus int, code int, msg string, data interfa
 }
 
 // Success 成功响应
-func Success(c *gin.Context, msg string, data interface{}) {
+func Success(c *gin.Context, msg string, data any) {
 	Response(c, http.StatusOK, SUCCESS, msg, data)
 }
 
-// Fail 失败响应: 业务错误, 非系统错误
-func Fail(c *gin.Context, code int, msg string) {
-	Response(c, http.StatusOK, code, msg, nil)
+// Fail 失败响应
+func Fail(ctx *gin.Context, httpStatus int, msg string) {
+	Response(ctx, httpStatus, ERROR, msg, nil)
 }
 
 // Fatal 系统错误响应
