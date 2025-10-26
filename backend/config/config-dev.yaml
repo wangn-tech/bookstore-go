@@ -1,0 +1,29 @@
+server:
+  port: 8082
+  admin_port: 8083
+  # mode: debug | release | test
+  mode: debug
+
+mysql:
+  host: 127.0.0.1
+  # Docker 中 MySQL 的 3306 端口映射到 WSL2 的 3307 端口 (../docker-compose.yaml)
+  port: 3307
+  user: root
+  password: root123456
+  db_name: bookstore
+
+redis:
+  host: 127.0.0.1
+  port: 6379
+  password: ""
+  db: 0
+
+jwt:
+  secret_key: bookstore
+
+# 日志配置
+log:
+  level: "debug"      # 日志级别: debug, info, warn, error
+  format: "console"   # 输出格式: console (开发), json (生产)
+  show-line: true     # 是否显示文件名和行号
+  stacktrace: true    # 在 error 级别日志中是否包含堆栈信息
