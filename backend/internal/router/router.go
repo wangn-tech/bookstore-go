@@ -8,6 +8,7 @@ import (
 
 type RouteGroup struct {
 	bookstore.UserRouter
+	bookstore.BookRouter
 }
 
 var AllRouter = new(RouteGroup)
@@ -28,5 +29,6 @@ func InitRouter(r *gin.Engine) {
 	v1 := r.Group("/api/v1")
 	{
 		AllRouter.InitUserRouter(v1)
+		AllRouter.InitBookRouter(v1)
 	}
 }
