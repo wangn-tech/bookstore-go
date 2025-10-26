@@ -10,7 +10,7 @@ import (
 )
 
 type IBookService interface {
-	GetBooksByPage(ctx context.Context, dto request.BooksPageDTO) (*result.PageResult[*model.Book], error)
+	GetBooksByPage(ctx context.Context, dto *request.BooksPageDTO) (*result.PageResult[*model.Book], error)
 	GetBookByID(ctx context.Context, id uint64) (*model.Book, error)
 	SearchBooksWithPagination(ctx context.Context, keyword string, pageReq *request.BooksPageDTO) (*result.PageResult[*model.Book], error)
 	GetBooksByType(ctx context.Context, bookType string) ([]*model.Book, error)
@@ -29,7 +29,7 @@ func NewBookService(bookDao *repository.BookDao) IBookService {
 }
 
 // GetBooksByPage 分页获取书籍列表
-func (b *BookServiceImpl) GetBooksByPage(ctx context.Context, dto request.BooksPageDTO) (*result.PageResult[*model.Book], error) {
+func (b *BookServiceImpl) GetBooksByPage(ctx context.Context, dto *request.BooksPageDTO) (*result.PageResult[*model.Book], error) {
 	pageResult, err := b.bookDao.GetBooksByPage(ctx, dto.Page, dto.PageSize)
 	if err != nil {
 		return nil, err
