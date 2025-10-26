@@ -3,6 +3,10 @@
 前端启动方式
 - 用户端
 ```bash
+
+# 停止并删除旧容器
+docker rm -f bookstore-frontend
+
 # 构建镜像
 docker build -t bookstore-frontend:latest ./frontend/bookstore-fronted-master
 
@@ -11,6 +15,9 @@ docker run -d --name bookstore-frontend -p 3000:3000 bookstore-frontend:latest
 
 # 启动容器 bookstore-frontend
 docker start bookstore-frontend
+
+# 查看日志
+docker logs -f bookstore-frontend
 ```
 
 - 管理端
