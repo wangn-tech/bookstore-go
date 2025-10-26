@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/wangn-tech/bookstore-go/internal/api/request"
 	"github.com/wangn-tech/bookstore-go/internal/api/response"
 	"github.com/wangn-tech/bookstore-go/internal/model"
 	"github.com/wangn-tech/bookstore-go/internal/repository"
@@ -20,9 +21,9 @@ type IUserService interface {
 	// GetUserByID 获取用户信息
 	GetUserByID(ctx context.Context, userID uint64) (*model.User, error)
 	// UpdateUserProfile 更新用户信息
-	UpdateUserProfile(ctx context.Context) error
+	UpdateUserProfile(ctx context.Context, userID uint64, profileDTO *request.UserProfileDTO) error
 	// ChangePassword 修改密码
-	ChangePassword(ctx context.Context) error
+	ChangePassword(ctx context.Context, userID uint64, oldPassword, newPassword string) error
 }
 
 type UserServiceImpl struct {
@@ -108,11 +109,48 @@ func (u *UserServiceImpl) GetUserByID(ctx context.Context, userID uint64) (*mode
 	return user, nil
 }
 
-func (u *UserServiceImpl) UpdateUserProfile(ctx context.Context) error {
+func (u *UserServiceImpl) UpdateUserProfile(ctx context.Context, userID uint64, profileDTO *request.UserProfileDTO) error {
+	// 检查用户是否存在
+	user, err := u.userDao.GetUserByID(ctx, userID)
+	if err != nil || user == nil {
+		return errors.New("用户不存在")
+	}
+
+	// 更新用户信息
+	user.Email = profileDTO.Email
+	user.Phone = profileDTO.Phone
+	user.Avatar = profileDTO.Avatar
+
+	// 调用 dao 层保存用户信息
+	if err := u.userDao.UpdateUser(ctx, user); err != nil {
+		return errors.New("更新用户信息失败")
+	}
 	return nil
 }
 
-func (u *UserServiceImpl) ChangePassword(ctx context.Context) error {
+// ChangePassword 修改密码
+func (u *UserServiceImpl) ChangePassword(ctx context.Context, userID uint64, oldPassword, newPassword string) error {
+	// 获取用户信息
+	user, err := u.userDao.GetUserByID(ctx, userID)
+	if err != nil || user == nil {
+		return errors.New("用户不存在")
+	}
+
+	// 校验旧密码
+	if !utils.CheckPasswordHash(oldPassword, user.Password) {
+		return errors.New("旧密码错误")
+	}
+
+	// 更新密码
+	hashedPassword, err := utils.HashPassword(newPassword)
+	if err != nil {
+		return errors.New("密码加密失败")
+	}
+	user.Password = hashedPassword
+	err = u.userDao.UpdateUser(ctx, user)
+	if err != nil {
+		return errors.New("更新密码失败")
+	}
 	return nil
 }
 

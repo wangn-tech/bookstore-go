@@ -154,3 +154,87 @@ func (u *UserHandler) Logout(ctx *gin.Context) {
 	logger.Log.Info("Logout: 登出成功", zap.Uint64("userID", userID))
 	result.Success(ctx, "用户登出成功", nil)
 }
+
+// UpdateUserProfile 更新用户信息
+func (u *UserHandler) UpdateUserProfile(ctx *gin.Context) {
+	// 从 context 中获取 userID
+	userIDVal, ok := ctx.Get("userID")
+	if !ok {
+		logger.Log.Warn("UpdateUserProfile: 用户ID不存在")
+		result.Fail(ctx, http.StatusUnauthorized, "用户未登录")
+		return
+	}
+	userID, ok := userIDVal.(uint64)
+	if !ok {
+		logger.Log.Warn("UpdateUserProfile: 用户ID类型不匹配", zap.Any("userID", userIDVal))
+		result.Fail(ctx, http.StatusUnauthorized, "用户未登录")
+		return
+	}
+
+	var updateData request.UserProfileDTO
+	if err := ctx.ShouldBindJSON(&updateData); err != nil {
+		logger.Log.Warn("UpdateUserProfile: 用户信息参数绑定失败", zap.Error(err))
+		result.Fail(ctx, http.StatusBadRequest, "请求参数错误")
+		return
+	}
+
+	// 调用 service 更新 userProfile
+	if err := u.userService.UpdateUserProfile(ctx.Request.Context(), userID, &updateData); err != nil {
+		logger.Log.Warn("UpdateUserProfile: 更新用户信息失败", zap.Error(err))
+		result.Fail(ctx, http.StatusInternalServerError, "更新用户信息失败")
+		return
+	}
+
+	// 获取更新后的 userProfile
+	updateUser, err := u.userService.GetUserByID(ctx.Request.Context(), userID)
+	if err != nil {
+		logger.Log.Warn("UpdateUserProfile: 获取更新后用户信息失败", zap.Error(err))
+		result.Fail(ctx, http.StatusInternalServerError, "获取用户信息失败")
+		return
+	}
+	result.Success(ctx, "更新用户信息成功", updateUser)
+}
+
+// ChangePassword 修改密码
+func (u *UserHandler) ChangePassword(ctx *gin.Context) {
+	// 从 context 中获取 userID
+	userIDVal, ok := ctx.Get("userID")
+	if !ok {
+		logger.Log.Warn("UpdateUserProfile: 用户ID不存在")
+		result.Fail(ctx, http.StatusUnauthorized, "用户未登录")
+		return
+	}
+	userID, ok := userIDVal.(uint64)
+	if !ok {
+		logger.Log.Warn("UpdateUserProfile: 用户ID类型不匹配", zap.Any("userID", userIDVal))
+		result.Fail(ctx, http.StatusUnauthorized, "用户未登录")
+		return
+	}
+
+	var passwordData struct {
+		OldPassword string `json:"old_password" binding:"required"`
+		NewPassword string `json:"new_password" binding:"required"`
+	}
+	if err := ctx.ShouldBindJSON(&passwordData); err != nil {
+		logger.Log.Warn("ChangePassword: 密码参数绑定失败", zap.Error(err))
+		result.Fail(ctx, http.StatusBadRequest, "请求参数错误")
+		return
+	}
+
+	// 校验新密码长度
+	if len(passwordData.NewPassword) < 6 {
+		logger.Log.Warn("ChangePassword: 新密码长度不足")
+		result.Fail(ctx, http.StatusBadRequest, "新密码长度不足，至少需要6位")
+		return
+	}
+
+	// 调用 service 修改密码
+	err := u.userService.ChangePassword(ctx.Request.Context(), userID, passwordData.OldPassword, passwordData.NewPassword)
+	if err != nil {
+		logger.Log.Warn("ChangePassword: 修改密码失败", zap.Error(err))
+		result.Fail(ctx, http.StatusInternalServerError, "修改密码失败")
+		return
+	}
+
+	result.Success(ctx, "修改密码成功", nil)
+}

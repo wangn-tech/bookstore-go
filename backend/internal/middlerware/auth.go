@@ -43,7 +43,7 @@ func JWTAuth() gin.HandlerFunc {
 			ctx.Abort()
 			return
 		}
-		valid := utils.IsTokenValidInRedis(claims.UserID, authHeader, constants.AccessToken)
+		valid := utils.IsTokenValidInRedis(claims.UserID, tokenStr, constants.AccessToken)
 		if !valid {
 			logger.Log.Warn("JWTAuth: token 已失效或被撤销",
 				zap.Uint64("userID", claims.UserID),

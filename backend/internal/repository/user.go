@@ -87,3 +87,8 @@ func (u *UserDao) GetUserByID(ctx context.Context, userID uint64) (*model.User, 
 	}
 	return &user, nil
 }
+
+// UpdateUser 更新用户信息
+func (u *UserDao) UpdateUser(ctx context.Context, user *model.User) error {
+	return u.db.WithContext(ctx).Save(user).Error
+}

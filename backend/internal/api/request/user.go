@@ -18,3 +18,10 @@ type UserLoginDTO struct {
 	CaptchaID    string `json:"captcha_id" binding:"required"`
 	CaptchaValue string `json:"captcha_value" binding:"required"`
 }
+
+type UserProfileDTO struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Phone    string `json:"phone"`
+	Avatar   string `json:"avatar"`
+}
