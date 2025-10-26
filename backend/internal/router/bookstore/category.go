@@ -20,11 +20,11 @@ func (c *CategoryRouter) InitCategoryRouter(router *gin.RouterGroup) {
 
 	categoryGroup := router.Group("/category")
 	{
-		categoryGroup.GET("/list", categoryHandler.GetCategories)
-		categoryGroup.GET("/:id", categoryHandler.GetCategoryByID)
-		categoryGroup.POST("/create", categoryHandler.CreateCategory)
-		categoryGroup.PUT("/:id", categoryHandler.UpdateCategory)
-		categoryGroup.DELETE("/:id", categoryHandler.DeleteCategory)
+		categoryGroup.GET("/list", categoryHandler.GetCategories)     // 获取所有分类
+		categoryGroup.GET("/:id", categoryHandler.GetCategoryByID)    // 根据 ID 获取分类详情
+		categoryGroup.POST("/create", categoryHandler.CreateCategory) // 创建分类
+		categoryGroup.PUT("/:id", categoryHandler.UpdateCategory)     // 更新分类
+		categoryGroup.DELETE("/:id", categoryHandler.DeleteCategory)  // 删除分类
 	}
 
 }

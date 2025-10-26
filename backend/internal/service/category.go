@@ -9,6 +9,7 @@ import (
 
 type ICategoryService interface {
 	GetAllCategories(ctx context.Context) ([]*model.Category, error)
+	GetCategoryByID(ctx context.Context, id uint64) (*model.Category, error)
 }
 
 type CategoryServiceImpl struct {
@@ -26,4 +27,9 @@ func NewCategoryService(categoryDao *repository.CategoryDao) ICategoryService {
 // GetAllCategories 获取所有分类
 func (c *CategoryServiceImpl) GetAllCategories(ctx context.Context) ([]*model.Category, error) {
 	return c.categoryDao.GetAllCategories(ctx)
+}
+
+// GetCategoryByID 根据 ID 获取分类详情
+func (c *CategoryServiceImpl) GetCategoryByID(ctx context.Context, id uint64) (*model.Category, error) {
+	return c.categoryDao.GetCategoryByID(ctx, id)
 }
