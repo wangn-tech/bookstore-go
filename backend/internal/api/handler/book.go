@@ -36,7 +36,7 @@ func (b *BookHandler) GetBookList(ctx *gin.Context) {
 		pageReq.PageSize = 10
 	}
 
-	pageResult, err := b.bookService.GetBooksByPage(ctx.Request.Context(), pageReq)
+	pageResult, err := b.bookService.GetBooksByPage(ctx.Request.Context(), &pageReq)
 	if err != nil {
 		// Handle error (omitted for brevity)
 		logger.Log.Error("GetBookList: 获取书籍列表失败", zap.Error(err))
