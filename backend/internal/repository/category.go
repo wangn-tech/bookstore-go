@@ -34,3 +34,18 @@ func (r *CategoryDao) GetCategoryByID(ctx context.Context, id uint64) (*model.Ca
 	}
 	return &category, nil
 }
+
+// CreateCategory 创建分类
+func (r *CategoryDao) CreateCategory(ctx context.Context, category *model.Category) error {
+	return r.db.WithContext(ctx).Create(category).Error
+}
+
+// UpdateCategory 更新分类
+func (r *CategoryDao) UpdateCategory(ctx context.Context, category *model.Category) error {
+	return r.db.WithContext(ctx).Save(category).Error
+}
+
+// DeleteCategory 删除分类
+func (r *CategoryDao) DeleteCategory(ctx context.Context, id uint64) error {
+	return r.db.WithContext(ctx).Delete(&model.Category{}, id).Error
+}
