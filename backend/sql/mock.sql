@@ -1,4 +1,5 @@
 Use bookstore;
+SET NAMES utf8mb4;
 
 -- 插入分类数据
 INSERT INTO categories (name, description, icon, color, gradient, sort, is_active, book_count) VALUES

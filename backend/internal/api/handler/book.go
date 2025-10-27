@@ -35,7 +35,7 @@ func (b *BookHandler) GetBookList(ctx *gin.Context) {
 		pageReq.Page = 1
 		pageReq.PageSize = 10
 	}
-
+	result.PageVerify(&pageReq.Page, &pageReq.PageSize)
 	pageResult, err := b.bookService.GetBooksByPage(ctx.Request.Context(), &pageReq)
 	if err != nil {
 		// Handle error (omitted for brevity)
@@ -118,6 +118,7 @@ func (b *BookHandler) SearchBooks(ctx *gin.Context) {
 		pageReq.Page = 1
 		pageReq.PageSize = 12
 	}
+	result.PageVerify(&pageReq.Page, &pageReq.PageSize)
 	// service 层返回分页结果
 	pageResult, err := b.bookService.SearchBooksWithPagination(ctx.Request.Context(), keyword, &pageReq)
 	if err != nil {

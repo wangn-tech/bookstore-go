@@ -9,7 +9,7 @@ type CreateOrderItemDTO struct {
 
 // CreateOrderDTO 创建订单请求
 type CreateOrderDTO struct {
-	UserID uint64               `json:"user_id" binding:"required"`
+	UserID uint64               `json:"user_id"`
 	Items  []CreateOrderItemDTO `json:"items" binding:"required"`
 }
 

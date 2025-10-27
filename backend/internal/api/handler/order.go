@@ -74,6 +74,7 @@ func (o *OrderHandler) GetUserOrders(ctx *gin.Context) {
 		result.Fail(ctx, http.StatusUnauthorized, "用户未登录")
 		return
 	}
+	result.PageVerify(&req.Page, &req.PageSize)
 	// 调用 service 层获取订单列表 (分页查询)
 	pageResult, err := o.orderService.GetUserOrders(ctx, userID.(uint64), &req)
 	if err != nil {
