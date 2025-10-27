@@ -12,15 +12,16 @@ type RouteGroup struct {
 	bookstore.CategoryRouter
 	bookstore.OrderRouter
 	bookstore.FavoriteRouter
+	bookstore.CarouselRouter
 }
 
 var AllRouter = new(RouteGroup)
 
 func InitRouter(r *gin.Engine) {
-	r.Use(func(c *gin.Context) {
-		c.Header("Content-Type", "application/json; charset=utf-8")
-		c.Next()
-	})
+	// r.Use(func(c *gin.Context) {
+	// 	c.Header("Content-Type", "application/json; charset=utf-8")
+	// 	c.Next()
+	// })
 	// 全局中间件 CORS
 	r.Use(middlerware.CORS())
 
@@ -39,6 +40,7 @@ func InitRouter(r *gin.Engine) {
 		AllRouter.InitCategoryRouter(v1)
 		AllRouter.InitOrderRouter(v1)
 		AllRouter.InitFavoriteRouter(v1)
+		AllRouter.InitCarouselRouter(v1)
 
 	}
 }
